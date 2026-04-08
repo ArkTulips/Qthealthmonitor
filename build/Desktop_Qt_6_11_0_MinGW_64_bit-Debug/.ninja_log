@@ -1,0 +1,16 @@
+# ninja log v6
+63	1360	7973522450967092	Qthealthmonitor_autogen/timestamp	64c2c7dbb9562fc6
+63	1360	7973522450967092	Qthealthmonitor_autogen/mocs_compilation.cpp	64c2c7dbb9562fc6
+63	1360	7973522450967092	D:/qt-case-study/Qthealthmonitor/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debug/Qthealthmonitor_autogen/timestamp	64c2c7dbb9562fc6
+1362	5309	7973522452725145	CMakeFiles/Qthealthmonitor.dir/Qthealthmonitor_autogen/mocs_compilation.cpp.obj	86392015838d4832
+63	1360	7973522450967092	D:/qt-case-study/Qthealthmonitor/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debug/Qthealthmonitor_autogen/mocs_compilation.cpp	64c2c7dbb9562fc6
+1373	5344	7973522452840666	CMakeFiles/Qthealthmonitor.dir/main.cpp.obj	80785b0aab3a2618
+1387	5899	7973522452988296	CMakeFiles/Qthealthmonitor.dir/mainwindow.cpp.obj	5fb5326a26ced6f1
+5900	6276	7973522498108274	Qthealthmonitor.exe	afee252845127692
+58	401	7973527164772234	Qthealthmonitor_autogen/timestamp	64c2c7dbb9562fc6
+58	401	7973527164772234	Qthealthmonitor_autogen/mocs_compilation.cpp	64c2c7dbb9562fc6
+58	401	7973527164772234	D:/qt-case-study/Qthealthmonitor/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debug/Qthealthmonitor_autogen/timestamp	64c2c7dbb9562fc6
+58	401	7973527164772234	D:/qt-case-study/Qthealthmonitor/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debug/Qthealthmonitor_autogen/mocs_compilation.cpp	64c2c7dbb9562fc6
+415	3825	7973527168340011	CMakeFiles/Qthealthmonitor.dir/asynctask.cpp.obj	2d53dfc2650022df
+404	4714	7973527168224556	CMakeFiles/Qthealthmonitor.dir/mainwindow.cpp.obj	5fb5326a26ced6f1
+4714	5096	7973527211322321	Qthealthmonitor.exe	74c42ca541472bdf
