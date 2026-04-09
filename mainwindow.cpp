@@ -136,29 +136,16 @@ MainWindow::MainWindow(QWidget *parent)
         timer->start(1000);
     });
 
-    // =========================
-    // 🔹 LOAD BUTTON (ASYNC)
-    // =========================
+
     connect(ui->loadButton, &QPushButton::clicked, this, [=]() {
 
         currentState = Loading;
         ui->progressBar->setValue(0);
         updateStatus();
 
-        AsyncTask::run([this]() {
-
-            loadPatientHistory();
-
-            QMetaObject::invokeMethod(this, [this]() {
-                currentState = Completed;
-                updateStatus();
-
-                QTimer::singleShot(2000, this, [this]() {
-                    currentState = Monitoring;
-                    updateStatus();
-                });
-            });
-        });
+        ui->statusLabel->setText("Loading...");
+        loadPatientHistory();
+        ui->statusLabel->setText("Done");
     });
 }
 
