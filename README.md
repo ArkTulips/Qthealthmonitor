@@ -1,8 +1,8 @@
 #  Qt Health Monitor Dashboard
 
-##Authors
-###Sukrit Pal
-###Divyanshu
+## Authors
+### Sukrit Pal
+### Divyanshu
 
 ##  Overview
 
