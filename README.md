@@ -102,6 +102,9 @@ AsyncTask::run([this]() {
     QMetaObject::invokeMethod(this, [this]() {
         ui->statusLabel->setText("Done");
     });
-});
+});```
 
+##Authors
+###Sukrit Pal
+###Divyanshu
 
