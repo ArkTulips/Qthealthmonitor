@@ -1,5 +1,9 @@
 #  Qt Health Monitor Dashboard
 
+##Authors
+###Sukrit Pal
+###Divyanshu
+
 ##  Overview
 
 This project presents a **Qt-based Patient Monitoring Dashboard** developed in C++ to demonstrate how UI responsiveness can be improved using asynchronous execution.
@@ -104,7 +108,5 @@ AsyncTask::run([this]() {
     });
 });```
 
-##Authors
-###Sukrit Pal
-###Divyanshu
+
 
