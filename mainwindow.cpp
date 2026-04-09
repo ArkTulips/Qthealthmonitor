@@ -8,22 +8,50 @@
 #include <QVBoxLayout>
 #include <QChart>
 #include <QChartView>
+#include <QValueAxis>
+#include <QPen>
 #include <cstdlib>
 
 #include "asynctask.h"
 
-// 🔹 Simulated heavy task with progress
-void MainWindow::loadPatientHistory() {
-    for (int i = 0; i <= 100; i += 10) {
-        QThread::msleep(300);
+// =========================
+// 🔹 PATIENT HISTORY
+// =========================
+QString MainWindow::loadPatientHistory() {
 
-        QMetaObject::invokeMethod(this, [this, i]() {
-            ui->progressBar->setValue(i);
+    QString result;
+
+    int totalEntries = globalTime / 5;
+    if (totalEntries < 1) totalEntries = 1;
+
+    for (int i = 0; i < totalEntries; i++) {
+
+        QThread::msleep(80);
+
+        int hr = 60 + rand() % 40;
+
+        int timeSec = (i + 1) * 5;
+
+        result += QString("Time %1 sec → HR: %2 BPM\n")
+                      .arg(timeSec)
+                      .arg(hr);
+
+        QMetaObject::invokeMethod(this, [this, i, totalEntries]() {
+            int progress = (i * 100) / totalEntries;
+            ui->progressBar->setValue(progress);
         });
     }
+
+    QMetaObject::invokeMethod(this, [this]() {
+        ui->progressBar->setValue(100);
+    });
+
+    return result;
 }
 
-// 🔹 Status updater
+// =========================
+// 🔹 STATUS
+// =========================
 void MainWindow::updateStatus() {
     QString text;
 
@@ -48,14 +76,70 @@ void MainWindow::updateStatus() {
     ui->statusLabel->setText(text);
 }
 
-// 🔥 Constructor
+// =========================
+// 🔥 CONSTRUCTOR
+// =========================
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    // 🔹 Initial UI
+    // =========================
+    // 🔹 STYLE
+    // =========================
+    this->setStyleSheet(R"(
+
+    QMainWindow {
+        background-color: #0D1117;
+    }
+
+    QLabel#heartLabel {
+        font-size: 30px;
+        font-weight: bold;
+        color: #00FFAA;
+    }
+
+    QLabel#oxygenLabel {
+        font-size: 22px;
+        color: #4FC3F7;
+    }
+
+    QLabel#tempLabel {
+        font-size: 22px;
+        color: #FFB74D;
+    }
+
+    QLabel#statusLabel {
+        font-size: 18px;
+        font-weight: bold;
+        color: #FFD54F;
+    }
+
+    QPushButton {
+        background-color: #1F6FEB;
+        color: white;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    QTextEdit {
+        background-color: #161B22;
+        color: #00FFAA;
+        font-family: Consolas;
+        font-size: 14px;
+        border-radius: 8px;
+        padding: 6px;
+    }
+
+    QProgressBar::chunk {
+        background-color: #2EA043;
+    }
+
+    )");
+
     ui->progressBar->setValue(0);
 
     // =========================
@@ -63,17 +147,22 @@ MainWindow::MainWindow(QWidget *parent)
     // =========================
     series = new QLineSeries();
 
+    // Glow-like line
+    QPen pen(QColor("#00FFAA"));
+    pen.setWidth(3);
+    series->setPen(pen);
+
     QChart *chart = new QChart();
     chart->addSeries(series);
-    chart->setTitle("Heart Rate Monitor");
+    chart->setBackgroundBrush(QBrush(QColor("#0D1117")));
 
     axisX = new QValueAxis();
-    axisX->setRange(0, 30);
-    axisX->setTitleText("Time");
+    axisX->setRange(0, 100);
+    axisX->setVisible(false);
 
     QValueAxis *axisY = new QValueAxis();
     axisY->setRange(50, 120);
-    axisY->setTitleText("BPM");
+    axisY->setVisible(false);
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
@@ -94,34 +183,84 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(timer, &QTimer::timeout, this, [=]() mutable {
 
-        int heartRate = 60 + rand() % 40;
-        int oxygen = 90 + rand() % 10;
-        float temp = 36.0 + (rand() % 30) / 10.0;
+        static int slowCounter = 0;
+        static double lastHR = 75;
+        static int oxygen = 98;
+        static float temp = 36.5;
 
-        // 🔹 Update labels
+        slowCounter++;
+        globalTime++;
+
+        // 🔹 Smooth HR generation
+        // 🔹 base variation
+        // 🔹 natural pull toward baseline (75)
+        double baseline = 75;
+
+        double drift = (baseline - lastHR) * 0.05;  // pulls it back
+
+        double randomChange = (rand() % 5 - 2);
+
+        double targetHR = lastHR + drift + randomChange;
+
+        // 🔹 occasional spike
+        if (rand() % 25 == 0) {   // ~4% chance
+            targetHR += 15 + rand() % 10;  // spike up
+        }
+
+        // 🔹 rare high spike (alert scenario)
+        if (rand() % 60 == 0) {   // ~1.5% chance
+            targetHR += 25 + rand() % 15;
+        }
+
+        // 🔹 clamp to safe range
+        if (targetHR < 55) targetHR = 55;
+        if (targetHR > 130) targetHR = 130;
+
+
+        double smoothHR = lastHR + (targetHR - lastHR) * 0.3;
+        lastHR = smoothHR;
+        if (targetHR > lastHR)
+            smoothHR = lastHR + (targetHR - lastHR) * 0.4; // fast rise
+        else
+            smoothHR = lastHR + (targetHR - lastHR) * 0.15; // slow fall
+
+        // 🔹 Graph update (ONLY ONCE ✔)
+        series->append(timeCounter++, smoothHR);
+
+        // limit points
+        if (series->count() > 200) {
+            series->remove(0);
+        }
+
+        // smooth scrolling
+        axisX->setRange(timeCounter - 100, timeCounter);
+
+        // 🔹 Slow updates for vitals
+        if (slowCounter % 10 == 0) {
+            oxygen = 95 + rand() % 5;
+            temp += (rand() % 3 - 1) * 0.05;
+        }
+
+        // 🔹 UI update
         ui->heartLabel->setText(
-            QString("Heart Rate: %1 BPM").arg(heartRate)
+            QString("Heart Rate: %1 BPM").arg((int)smoothHR)
             );
+
         ui->oxygenLabel->setText(
             QString("Oxygen: %1 %").arg(oxygen)
             );
+
         ui->tempLabel->setText(
-            QString("Temperature: %1 °C").arg(temp)
+            QString("Temperature: %1 °C").arg(temp, 0, 'f', 1)
             );
 
-        // 🔹 Graph update
-        series->append(timeCounter++, heartRate);
-        if (timeCounter > 30) {
-            axisX->setRange(timeCounter - 30, timeCounter);
-        }
-
-        // 🔹 Alert logic
-        if (heartRate > 100) {
+        // 🔹 Alert
+        if (smoothHR > 100) {
             currentState = Alert;
             ui->heartLabel->setStyleSheet("color: red;");
         } else {
             currentState = Monitoring;
-            ui->heartLabel->setStyleSheet("color: green;");
+            ui->heartLabel->setStyleSheet("color: #00FFAA;");
         }
 
         updateStatus();
@@ -133,11 +272,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->startButton, &QPushButton::clicked, this, [=]() {
         currentState = Monitoring;
         updateStatus();
-        timer->start(1000);
+        timer->start(100);  // fast = smooth
     });
 
-
+    // =========================
+    // 🔹 LOAD BUTTON
+    // =========================
     connect(ui->loadButton, &QPushButton::clicked, this, [=]() {
+
+        currentState = Loading;
+        ui->progressBar->setValue(0);
+        updateStatus();
+
+       connect(ui->loadButton, &QPushButton::clicked, this, [=]() {
 
         currentState = Loading;
         ui->progressBar->setValue(0);
@@ -146,6 +293,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->statusLabel->setText("Loading...");
         loadPatientHistory();
         ui->statusLabel->setText("Done");
+    });
     });
 }
 
