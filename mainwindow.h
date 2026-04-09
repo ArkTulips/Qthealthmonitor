@@ -32,6 +32,7 @@ public:
     ~MainWindow() override;
 
 private:
+    int globalTime = 0;
     Ui::MainWindow *ui;
 
     // 🔹 State
@@ -47,7 +48,7 @@ private:
 
     // 🔹 Methods
     void updateStatus();
-    void loadPatientHistory();
+    QString loadPatientHistory();
 };
 
 #endif
